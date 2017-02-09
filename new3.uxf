@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?><diagram program="umlet" version="12.1">
+  <zoom_level>10</zoom_level>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>490</x>
+      <y>390</y>
+      <w>210</w>
+      <h>160</h>
+    </coordinates>
+    <panel_attributes>Mitglied
+--
+-id: Guid
+-Name: String
+-Vorname: String
+-Erwerbstätigkeit: int
+-Kontoverbindung:Konto
+-Geburtsdatum:DateTime</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>30</x>
+      <y>340</y>
+      <w>240</w>
+      <h>190</h>
+    </coordinates>
+    <panel_attributes>Konto
+--
+-id: Guid
+-IBAN:String
+-BIC:String
+--
++Konto(IBAN:string, BIC:string)
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>240</x>
+      <y>390</y>
+      <w>270</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes/>
+    <additional_attributes>30;30;250;70</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>70</x>
+      <y>20</y>
+      <w>690</w>
+      <h>190</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Interface&gt;&gt;
+BankSST
+--
++SEPAEinzug(konto: Konto, betrag:decimal): void
++holeKontoaktivitäten(konto:Konto, beginn:DateTime, ende:DateTime):[]Umsätzen</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>

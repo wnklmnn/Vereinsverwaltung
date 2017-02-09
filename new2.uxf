@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><diagram program="umlet" version="12.1">
+  <zoom_level>7</zoom_level>
+  <element>
+    <type>com.umlet.element.SequenceDiagram</type>
+    <coordinates>
+      <x>35</x>
+      <y>42</y>
+      <w>287</w>
+      <h>266</h>
+    </coordinates>
+    <panel_attributes>title: Mitglieg anlegen
+_Oberfläche~id1_|_System~id2_|_Datenbank~id3_
+id1-&gt;&gt;id2:id1,id2:neuerNutzer()
+id2-&gt;&gt;id1:id1,id2:
+id2-/&gt;id1:
+id3-&gt;&gt;&gt;id1:id1,id3
+id1.&gt;id3:id1,id3:async return Msg
+id1-&gt;id1:id1:self
+iframe{:interaction frame
+id2-&gt;id3:id1,id3:async Msg.
+iframe}</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.SequenceDiagram</type>
+    <coordinates>
+      <x>357</x>
+      <y>231</y>
+      <w>406</w>
+      <h>266</h>
+    </coordinates>
+    <panel_attributes>title: Mitglied anlegen
+_Nuzter~id1_|_Anwendung~id2_|_System~id3_|_Datenbank~id4_
+id1-&gt;&gt;id2:id1,id2:neuesMitglieg
+id2-&gt;&gt;id3:id2,id3:neuesMitgliedObjekt
+id3-&gt;&gt;id2:id2,id3:zeigeFormular
+id1-&gt;&gt;id2:id1,id2:ändereDaten
+id1-&gt;&gt;id2:id1,id2:speichern
+id2-&gt;&gt;id3:id2,id3:NutzerSpeichern
+id3-&gt;&gt;id4:id3,id4:schreibeInDatenbank
+id4-&gt;&gt;id3:id4,id3
+id3-&gt;&gt;id2:id2,id3
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>

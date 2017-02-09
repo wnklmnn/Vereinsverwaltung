@@ -2,7 +2,7 @@ using System;
 
 namespace Entitäten
 {
-  public class Konto
+  internal class Konto
   {
     public Konto()
     {

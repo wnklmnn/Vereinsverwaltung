@@ -23,6 +23,10 @@ namespace Entitäten
             get;
             private set;
         }
+    public Konto Kontoverbindung {
+      get;
+      private set;
+    }
     }
 }
 

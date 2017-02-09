@@ -7,6 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logik", "Logik\Logik.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankLib", "BankLib\BankLib.csproj", "{EDFF64F7-921F-43B7-806A-1256D8011427}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{64FA8375-D22F-40F1-A142-F8D3E022BFE1}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -25,6 +30,8 @@ Global
 		{EDFF64F7-921F-43B7-806A-1256D8011427}.Debug|x86.Build.0 = Debug|Any CPU
 		{EDFF64F7-921F-43B7-806A-1256D8011427}.Release|x86.ActiveCfg = Release|Any CPU
 		{EDFF64F7-921F-43B7-806A-1256D8011427}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = Client\Client.csproj

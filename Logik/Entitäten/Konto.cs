@@ -1,5 +1,5 @@
 //
-//  Program.cs
+//  Konto.cs
 //
 //  Author:
 //       Pascal Winkelmann <pascal@wnklmnn.de>
@@ -20,13 +20,20 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using System;
 
-namespace Client
+namespace Entitäten
 {
-    class MainClass
+  public class Konto
+  {
+    public Konto()
     {
-        public static void Main(string[] args)
-        {
-            
-        }
     }
+    public string IBAN {
+      get;
+      private set;
+    }
+    public string BIC {
+      get;
+      private set;
+    }
+  }
 }

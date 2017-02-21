@@ -21,7 +21,7 @@ namespace VerwaltungLib
 
 		public void Einziehen(decimal beitrag, decimal ermaessigterBeitrag) {
 			foreach(Mitglied mitglied in _db.FindeMitglieder()) {
-				if(DateTime.Now.Year != mitglied.bezahltesjahr) {
+				if(DateTime.Now.Year != mitglied.Bezahltesjahr) {
 					Kontoverbindung konto = _db.FindKonto (mitglied.KontoverbindungsId);
 					_bank.SepaEinzug (
 						konto.IBAN, 
@@ -55,7 +55,7 @@ namespace VerwaltungLib
 				Geburtstag = geburtstag, 
 				Berufsstand = bs, 
 				KontoverbindungsId = _db.FindeOderErstelleKontoverbindung (konto),
-				bezahltesjahr = null
+				Bezahltesjahr = null
 			});
 		}
 	}
@@ -98,7 +98,7 @@ namespace VerwaltungLib
 		public DateTime Geburtstag{ get; set; }
 		public Berufsstand Berufsstand{ get; set;}
 		public Guid KontoverbindungsId{ get; set;}
-		public int? bezahltesjahr{ get; set;}
+		public int? Bezahltesjahr{ get; set;}
 	}
 }
 

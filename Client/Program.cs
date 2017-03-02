@@ -8,6 +8,10 @@ namespace Client
 	{
 		private static int menu = 0;
 		private static int zeiger = 1;
+		private static string[] neueBeitraege = new[]{
+			string.Empty,
+			string.Empty
+		};
 		private static string[] neuerNutzer = new[] {
 			string.Empty,
 			string.Empty,
@@ -28,8 +32,16 @@ namespace Client
 			Console.Clear ();
 			if (menu == 0) {
 				menu = MaleHaupmenu ();
+				if (menu != 0)
+					zeiger = 1;
 			} else if (menu == 1) {
 				menu = MitgliedAnlegen ();
+			} else if (menu == 2){
+				menu = BeitraegeEinzihen ();
+			} else if (menu == 3){
+
+			} else if (menu == 3){
+
 			} else if (menu == -1) {
 				goto fluechten;
 			}
@@ -44,6 +56,32 @@ namespace Client
 			}
 		}
 
+		static int BeitraegeEinzihen ()
+		{
+			Console.WriteLine ("Mitglied anlegen");
+			Console.WriteLine ("[" + (zeiger == 1 ? "*" : " ") + "] Betrag: " + neueBeitraege[0]);
+			Console.WriteLine ("[" + (zeiger == 2 ? "*" : " ") + "] Ermaeßigter Betrag: " + neueBeitraege[1]);
+			var gedrueckteTaste = Console.ReadKey ();
+			if (GeheZuVorherigemMenupunkt(gedrueckteTaste) && zeiger > 1) {
+				zeiger--;
+			} else if (GeheZuNaechstemMenupunkt (gedrueckteTaste.Key) && zeiger < 2) {
+				zeiger++;
+			} else if (gedrueckteTaste.Key == ConsoleKey.Escape) {
+				zeiger = 1;
+				return 0;
+			} else if (gedrueckteTaste.Key == ConsoleKey.Enter) {
+				service.Einziehen (decimal.Parse (neueBeitraege [0]), decimal.Parse (neueBeitraege [1]));
+			} else if (gedrueckteTaste.Key == ConsoleKey.Backspace) {
+				var laenge = neueBeitraege [zeiger - 1].Length;
+				if (laenge > 0) {
+					neueBeitraege [zeiger - 1] = neueBeitraege [zeiger - 1].Remove (laenge - 1);
+				}
+			} else {
+				neueBeitraege [zeiger - 1] += gedrueckteTaste.KeyChar;
+			}
+			return menu;
+		}
+
 		private static int MitgliedAnlegen() {
 			Console.WriteLine ("Mitglied anlegen");
 			Console.WriteLine ("[" + (zeiger == 1 ? "*" : " ") + "] Vorname: " + neuerNutzer[0]);
@@ -54,10 +92,10 @@ namespace Client
 			Console.WriteLine ("[" + (zeiger == 6 ? "*" : " ") + "] BIC: " + neuerNutzer[5]);
 			Console.WriteLine ("[" + (zeiger == 7 ? "*" : " ") + "] Kontoinhaber: " + neuerNutzer[6]);
 			var gedrueckteTaste = Console.ReadKey ();
-			if (GeheZuNaechstemMenupunkt(gedrueckteTaste.Key) && zeiger < 7) {
-				zeiger++;
-			} else if (gedrueckteTaste.Key == ConsoleKey.UpArrow && zeiger > 1) {
+			if (GeheZuVorherigemMenupunkt(gedrueckteTaste) &&zeiger > 1) {
 				zeiger--;
+			} else if (GeheZuNaechstemMenupunkt(gedrueckteTaste.Key) && zeiger < 7) {
+				zeiger++;
 			} else if (gedrueckteTaste.Key == ConsoleKey.Escape) {
 				zeiger = 1;
 				return 0;
@@ -107,17 +145,22 @@ namespace Client
 			Console.WriteLine ("[" + (zeiger == 2 ? "*" : " ") + "] Beiträge einziehen" + (zeiger == 2 ? "\t   <-" : string.Empty));
 			Console.WriteLine ("[" + (zeiger == 3 ? "*" : " ") + "] Kontoaktivitäten laden" + (zeiger == 3 ? " <-" : string.Empty));
 			Console.WriteLine ("[" + (zeiger == 4 ? "*" : " ") + "] Jahresbilanz anzeigen" + (zeiger == 4 ? "  <-" : string.Empty));
-			var gedrueckteTaste = Console.ReadKey ().Key;
-			if (GeheZuNaechstemMenupunkt(gedrueckteTaste) && zeiger < 4) {
-				zeiger++;
-			} else if (gedrueckteTaste == ConsoleKey.UpArrow && zeiger > 1) {
+			var gedrueckteTaste = Console.ReadKey ();
+			if (GeheZuVorherigemMenupunkt(gedrueckteTaste) &&zeiger > 1) {
 				zeiger--;
-			} else if (gedrueckteTaste == ConsoleKey.Escape) {
+			} else if (GeheZuNaechstemMenupunkt(gedrueckteTaste.Key) && zeiger < 4) {
+				zeiger++;
+			}  else if (gedrueckteTaste.Key == ConsoleKey.Escape) {
 				return -1;
-			} else if (gedrueckteTaste == ConsoleKey.Enter) {
+			} else if (gedrueckteTaste.Key == ConsoleKey.Enter) {
 				return zeiger;
 			}
 			return menu;
+		}
+
+		static bool GeheZuVorherigemMenupunkt (ConsoleKeyInfo gedrueckteTaste)
+		{
+			return (gedrueckteTaste.Key == ConsoleKey.UpArrow || gedrueckteTaste.Modifiers == ConsoleModifiers.Shift && gedrueckteTaste.Key == ConsoleKey.Tab);
 		}
 
 		private static bool GeheZuNaechstemMenupunkt(ConsoleKey taste) {

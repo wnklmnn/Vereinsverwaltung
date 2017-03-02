@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VerwaltungLib", "VerwaltungLib\VerwaltungLib.csproj", "{D84121E6-7419-4D82-92C2-BB7338FEB1EE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csproj", "{E6022158-09EB-480A-9ECE-51C753444A53}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +15,10 @@ Global
 		{D84121E6-7419-4D82-92C2-BB7338FEB1EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D84121E6-7419-4D82-92C2-BB7338FEB1EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D84121E6-7419-4D82-92C2-BB7338FEB1EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6022158-09EB-480A-9ECE-51C753444A53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6022158-09EB-480A-9ECE-51C753444A53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6022158-09EB-480A-9ECE-51C753444A53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6022158-09EB-480A-9ECE-51C753444A53}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = VerwaltungLib\VerwaltungLib.csproj

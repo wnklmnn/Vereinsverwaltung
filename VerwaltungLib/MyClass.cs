@@ -31,6 +31,7 @@ namespace VerwaltungLib
 							beitrag : 
 							ermaessigterBeitrag,
 						"GELD FÜR " + DateTime.Now.Year);
+					mitglied.Bezahltesjahr = DateTime.Now.Year;
 				}
 			}
 		}
@@ -54,7 +55,7 @@ namespace VerwaltungLib
 				Nachname = nachname, 
 				Geburtstag = geburtstag, 
 				Berufsstand = bs, 
-				KontoverbindungsId = _db.FindeOderErstelleKontoverbindung (konto),
+				KontoverbindungsId = _db.KontoSpeichern(konto),
 				Bezahltesjahr = null
 			});
 		}
@@ -67,6 +68,14 @@ namespace VerwaltungLib
 	}
 
 	public struct Kontoaktivitaeten {
+		public string IBAN {
+			get;
+			set;
+		}
+		public string Verwendungszweck {
+			get;
+			set;
+		}
 		public decimal Betrag { get; set; }
 		public DateTime Datum { get; set; }
 	}
@@ -75,8 +84,8 @@ namespace VerwaltungLib
 		Kontoverbindung FindKonto (Guid kontoverbindungsId);
 		IEnumerable<Mitglied> FindeMitglieder();
 		void SpeicherMitglied (Mitglied m);
-		Mitglied FindMitglied (Guid id);
-		Guid FindeOderErstelleKontoverbindung(Kontoverbindung konto);
+		Mitglied FindeMitglied (Guid id);
+		Guid KontoSpeichern(Kontoverbindung konto);
 	}
 
 	public enum Berufsstand{
@@ -84,14 +93,14 @@ namespace VerwaltungLib
 		Erwerbstaetig
 	}
 
-	public struct Kontoverbindung{
+	public class Kontoverbindung{
 		public Guid Id{ get; set;}
 		public string Kontoinhaber{ get; set;}
 		public string IBAN{ get; set;}
 		public  string BIC { get; set;}
 	}
 
-	public struct Mitglied{
+	public class Mitglied{
 		public Guid Id{ get; set;}
 		public string Vorname{ get; set;}
 		public string Nachname{ get; set;}

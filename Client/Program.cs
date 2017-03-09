@@ -12,6 +12,14 @@ namespace Client
 			string.Empty,
 			string.Empty
 		};
+		private static string[] kontoVonBis = new[]{
+			new DateTime(DateTime.Today.Year, DateTime.Today.Month, 01).ToLongDateString(),
+			new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.DaysInMonth(DateTime.Today.Year, DateTime.Today.Month)).ToLongDateString()
+		};
+		private static List<string> kontoBuffer = new List<string>();
+		private static IEnumerable<Kontoaktivitaeten> kontoaktivitaeten;
+		private static string jahr = DateTime.Today.Year.ToString();
+		private static Jahresbilanz jahresbilanz;
 		private static string[] neuerNutzer = new[] {
 			string.Empty,
 			string.Empty,
@@ -28,6 +36,13 @@ namespace Client
 		
 		public static void Main (string[] args)
 		{
+			Console.CursorVisible = false;
+
+			for (var i = 0; i<= 50; i++) {
+				service.MitgliedAnlegen (i.ToString (), i.ToString (), DateTime.Today, i % 2 == 0 ? Berufsstand.Student : Berufsstand.Erwerbstaetig, i.ToString (), i.ToString (), i.ToString ());
+			}
+			service.Einziehen (12, 14);
+		
 		start:
 			Console.Clear ();
 			if (menu == 0) {
@@ -39,21 +54,142 @@ namespace Client
 			} else if (menu == 2){
 				menu = BeitraegeEinzihen ();
 			} else if (menu == 3){
-
-			} else if (menu == 3){
-
+				menu = KontoaktivitaetenLaden ();
+			} else if (menu == 9){
+				menu = KontoaktivitaetenZeigen ();
+			} else if (menu == 4){
+				menu = JahresbilanzLaden ();
+			} else if (menu == 10){
+				menu = JahresbilanzZeigen ();
 			} else if (menu == -1) {
 				goto fluechten;
 			}
-		goto start;
-		fluechten:
-			service.MitgliedAnlegen("Vorname", "Nachname", DateTime.Now.Subtract(TimeSpan.FromDays(5)), Berufsstand.Student, "IBAAAANNNNN", "BIIIIC", "Vorname Nachname");
-			service.Einziehen (5m, 2.5m);
-			service.Einziehen (5m, 2.5m);
-			var aktivitaeten = service.KontoaktivitaetenLaden (DateTime.MinValue, DateTime.MaxValue);
-			foreach (var atk in aktivitaeten) {
-				Console.Out.Write(String.Format("Iban: {1}{0}Datum: {2}{0}Betrag: {3}{0}VerWendungszweck: {4}{0}", Environment.NewLine, atk.IBAN, atk.Datum, atk.Betrag, atk.Verwendungszweck));
+			goto start;
+		fluechten: 
+			;
+		}
+
+		private static int JahresbilanzZeigen() {
+			Console.WriteLine ("Jahresbilanz in " + System.Globalization.CultureInfo.CurrentCulture.NumberFormat.CurrencySymbol + ":");
+			Console.ForegroundColor = jahresbilanz.Vorjahr < 0 ? ConsoleColor.Red : ConsoleColor.DarkGreen;
+			Console.WriteLine ("Kontostand aus Vorjahr:  " + jahresbilanz.Vorjahr);
+			Console.ForegroundColor = ConsoleColor.DarkGreen;
+			Console.WriteLine ("Gewinn:                  " + jahresbilanz.Gewinn);
+			Console.ForegroundColor = ConsoleColor.Red;
+			Console.WriteLine ("Verlust:                 " + Math.Abs(jahresbilanz.Verlust));
+			Console.ForegroundColor = jahresbilanz.Kontostand < 0 ? ConsoleColor.Red : ConsoleColor.DarkGreen;
+			Console.WriteLine ("Aktueller Kontostand:    " + jahresbilanz.Kontostand);
+			Console.ResetColor ();
+
+			var gedrueckteTaste = Console.ReadKey ();
+			if (GeheZuVorherigemMenupunkt(gedrueckteTaste) && zeiger > 1) {
+				zeiger--;
+			} else if (GeheZuNaechstemMenupunkt (gedrueckteTaste.Key) && zeiger < 2) {
+				zeiger++;
+			} else if (gedrueckteTaste.Key == ConsoleKey.Escape) {
+				zeiger = 1;
+				kontoBuffer.Clear ();
+				return 0;
+			} else if (gedrueckteTaste.Key == ConsoleKey.F5) {
+				jahresbilanz = service.JahresbilanzErstellen (int.Parse (jahr));
+				return 10;
 			}
+			return menu;
+		}
+
+		private static int JahresbilanzLaden() {
+			Console.WriteLine ("Jahresbilanz laden:");
+
+			Console.WriteLine ("[" + (zeiger == 1 ? "*" : " ") + "] Jahr: " + jahr);
+
+			var gedrueckteTaste = Console.ReadKey ();
+			if (GeheZuVorherigemMenupunkt(gedrueckteTaste) && zeiger > 1) {
+				zeiger--;
+			} else if (GeheZuNaechstemMenupunkt (gedrueckteTaste.Key) && zeiger < 1) {
+				zeiger++;
+			} else if (gedrueckteTaste.Key == ConsoleKey.Escape) {
+				zeiger = 1;
+				return 0;
+			} else if (gedrueckteTaste.Key == ConsoleKey.Enter) {
+				jahresbilanz = service.JahresbilanzErstellen (int.Parse (jahr));
+				return 10;
+			} else if (gedrueckteTaste.Key == ConsoleKey.Backspace) {
+				var laenge = jahr.Length;
+				if (laenge > 0) {
+					jahr = jahr.Remove (laenge - 1);
+				}
+			} else {
+				jahr += gedrueckteTaste.KeyChar;
+			}
+			return menu;
+		}
+
+		private static int KontoaktivitaetenZeigen() {
+			Console.WriteLine ("Kontoaktivitaeten:" + zeiger);
+			Console.Write (string.Empty.PadLeft(Console.BufferWidth, '='));
+
+			if (!kontoBuffer.Any()) {
+				foreach (var kontoaktivitaet in kontoaktivitaeten) {
+					kontoBuffer.Add(Math.Abs(kontoaktivitaet.Betrag) + System.Globalization.CultureInfo.CurrentCulture.NumberFormat.CurrencySymbol + " am " + kontoaktivitaet.Datum.ToShortDateString() + (kontoaktivitaet.Betrag < 0 ? " nach " : " von ") + kontoaktivitaet.IBAN + " fuer " + kontoaktivitaet.Verwendungszweck);
+					kontoBuffer.Add(string.Empty.PadLeft(Console.BufferWidth, '='));
+				}
+			}
+
+			for (int i = zeiger; i < kontoBuffer.Count() && i < zeiger + Console.BufferHeight - 2; i++) {
+				Console.Write (Environment.NewLine);
+				Console.Write (kontoBuffer [i]);
+			}
+
+			var gedrueckteTaste = Console.ReadKey ();
+			if (GeheZuVorherigemMenupunkt(gedrueckteTaste) && zeiger > 0) {
+				zeiger--;
+			} else if (GeheZuNaechstemMenupunkt (gedrueckteTaste.Key) && zeiger < (kontoBuffer.Count() + 2) - Console.BufferHeight) {
+				zeiger++;
+			} else if (gedrueckteTaste.Key == ConsoleKey.Escape) {
+				zeiger = 1;
+				kontoBuffer.Clear ();
+				return 0;
+			} else if (gedrueckteTaste.Key == ConsoleKey.F5) {
+				kontoaktivitaeten = service.KontoaktivitaetenLaden (
+					DateTime.Parse (kontoVonBis [0]), 
+					DateTime.Parse (kontoVonBis [1]));
+				kontoBuffer.Clear ();
+				zeiger = 0;
+				return 9;
+			}
+			return menu;
+		}
+
+		private static int KontoaktivitaetenLaden ()
+		{
+			Console.WriteLine ("Kontoaktivitaeten laden:");
+
+			Console.WriteLine ("[" + (zeiger == 1 ? "*" : " ") + "] Von: " + kontoVonBis[0]);
+			Console.WriteLine ("[" + (zeiger == 2 ? "*" : " ") + "] Bis: " + kontoVonBis[1]);
+
+			var gedrueckteTaste = Console.ReadKey ();
+			if (GeheZuVorherigemMenupunkt(gedrueckteTaste) && zeiger > 1) {
+				zeiger--;
+			} else if (GeheZuNaechstemMenupunkt (gedrueckteTaste.Key) && zeiger < 2) {
+				zeiger++;
+			} else if (gedrueckteTaste.Key == ConsoleKey.Escape) {
+				zeiger = 1;
+				return 0;
+			} else if (gedrueckteTaste.Key == ConsoleKey.Enter) {
+				kontoaktivitaeten = service.KontoaktivitaetenLaden (
+					DateTime.Parse (kontoVonBis [0]), 
+					DateTime.Parse (kontoVonBis [1]));
+				zeiger = 0;
+				return 9;
+			} else if (gedrueckteTaste.Key == ConsoleKey.Backspace) {
+				var laenge = kontoVonBis [zeiger - 1].Length;
+				if (laenge > 0) {
+					kontoVonBis [zeiger - 1] = kontoVonBis [zeiger - 1].Remove (laenge - 1);
+				}
+			} else {
+				kontoVonBis [zeiger - 1] += gedrueckteTaste.KeyChar;
+			}
+			return menu;
 		}
 
 		static int BeitraegeEinzihen ()
@@ -71,6 +207,7 @@ namespace Client
 				return 0;
 			} else if (gedrueckteTaste.Key == ConsoleKey.Enter) {
 				service.Einziehen (decimal.Parse (neueBeitraege [0]), decimal.Parse (neueBeitraege [1]));
+				return 0;
 			} else if (gedrueckteTaste.Key == ConsoleKey.Backspace) {
 				var laenge = neueBeitraege [zeiger - 1].Length;
 				if (laenge > 0) {
@@ -143,7 +280,7 @@ namespace Client
 			Console.WriteLine ("Menü:");
 			Console.WriteLine ("[" + (zeiger == 1 ? "*" : " ") + "] Mitglied anlegen" + (zeiger == 1 ? "\t   <-" : string.Empty));
 			Console.WriteLine ("[" + (zeiger == 2 ? "*" : " ") + "] Beiträge einziehen" + (zeiger == 2 ? "\t   <-" : string.Empty));
-			Console.WriteLine ("[" + (zeiger == 3 ? "*" : " ") + "] Kontoaktivitäten laden" + (zeiger == 3 ? " <-" : string.Empty));
+			Console.WriteLine ("[" + (zeiger == 3 ? "*" : " ") + "] Kontoaktivitäten zeigen" + (zeiger == 3 ? " <-" : string.Empty));
 			Console.WriteLine ("[" + (zeiger == 4 ? "*" : " ") + "] Jahresbilanz anzeigen" + (zeiger == 4 ? "  <-" : string.Empty));
 			var gedrueckteTaste = Console.ReadKey ();
 			if (GeheZuVorherigemMenupunkt(gedrueckteTaste) &&zeiger > 1) {
@@ -209,6 +346,7 @@ namespace Client
 
 		public System.Collections.Generic.IEnumerable<Mitglied> FindeMitglieder ()
 		{
+			Console.Error.WriteLine ("Anzahl: " + mitglieder.Count ());
 			return this.mitglieder.AsEnumerable();
 		}
 

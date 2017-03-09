@@ -15,12 +15,34 @@ namespace VerwaltungLib
 			_bank = bank;
 		}
 
-		public void JahresbilanzErstellen(int jahr){
-			_bank.KontoaktivitaetenLaden (new DateTime (jahr, 1, 1), new DateTime (jahr, 12, 31));
+		public Jahresbilanz JahresbilanzErstellen(int jahr) {
+			var kontoaktivitaeten = _bank.KontoaktivitaetenLaden (DateTime.MinValue, new DateTime (jahr, 12, 31));
+
+			decimal vorjahr = 0, verlust = 0, gewinn = 0;
+
+			foreach (var kontoaktivitaet in kontoaktivitaeten) {
+				if (kontoaktivitaet.Datum.Year == jahr) {
+					if (kontoaktivitaet.Betrag < 0) {
+						verlust += kontoaktivitaet.Betrag;
+					} else {
+						gewinn += kontoaktivitaet.Betrag;
+					}
+				} else {
+					vorjahr += kontoaktivitaet.Betrag;
+				}
+			}
+
+			return new Jahresbilanz {
+				Vorjahr = vorjahr,
+				Gewinn = gewinn,
+				Verlust = verlust,
+				Kontostand = vorjahr + verlust + gewinn
+			};
 		}
 
 		public void Einziehen(decimal beitrag, decimal ermaessigterBeitrag) {
 			foreach(Mitglied mitglied in _db.FindeMitglieder()) {
+
 				if(DateTime.Now.Year != mitglied.Bezahltesjahr) {
 					Kontoverbindung konto = _db.FindKonto (mitglied.KontoverbindungsId);
 					_bank.SepaEinzug (
@@ -51,6 +73,7 @@ namespace VerwaltungLib
 
 			_db.SpeicherMitglied (
 				new Mitglied {
+				Id = Guid.NewGuid(),
 				Vorname = vorname, 
 				Nachname = nachname, 
 				Geburtstag = geburtstag, 
@@ -88,19 +111,19 @@ namespace VerwaltungLib
 		Guid KontoSpeichern(Kontoverbindung konto);
 	}
 
-	public enum Berufsstand{
+	public enum Berufsstand {
 		Student,
 		Erwerbstaetig
 	}
 
-	public class Kontoverbindung{
+	public class Kontoverbindung {
 		public Guid Id{ get; set;}
 		public string Kontoinhaber{ get; set;}
 		public string IBAN{ get; set;}
 		public  string BIC { get; set;}
 	}
 
-	public class Mitglied{
+	public class Mitglied {
 		public Guid Id{ get; set;}
 		public string Vorname{ get; set;}
 		public string Nachname{ get; set;}
@@ -108,6 +131,13 @@ namespace VerwaltungLib
 		public Berufsstand Berufsstand{ get; set;}
 		public Guid KontoverbindungsId{ get; set;}
 		public int? Bezahltesjahr{ get; set;}
+	}
+
+	public class Jahresbilanz {
+		public decimal Vorjahr { get; internal set; }
+		public decimal Verlust { get; internal set; }
+		public decimal Gewinn { get; internal set; }
+		public decimal Kontostand { get; internal set; }
 	}
 }
 

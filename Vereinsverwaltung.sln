@@ -21,7 +21,7 @@ Global
 		{E6022158-09EB-480A-9ECE-51C753444A53}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = VerwaltungLib\VerwaltungLib.csproj
+		StartupItem = Client\Client.csproj
 		Policies = $0
 		$0.TextStylePolicy = $1
 		$1.inheritsSet = Mono

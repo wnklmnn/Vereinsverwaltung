@@ -194,7 +194,7 @@ namespace Client
 
 		static int BeitraegeEinzihen ()
 		{
-			Console.WriteLine ("Mitglied anlegen");
+			Console.WriteLine ("Betraege einziehen:");
 			Console.WriteLine ("[" + (zeiger == 1 ? "*" : " ") + "] Betrag: " + neueBeitraege[0]);
 			Console.WriteLine ("[" + (zeiger == 2 ? "*" : " ") + "] Ermaeßigter Betrag: " + neueBeitraege[1]);
 			var gedrueckteTaste = Console.ReadKey ();

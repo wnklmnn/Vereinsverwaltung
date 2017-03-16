@@ -41,7 +41,8 @@ namespace VerwaltungLib
 		}
 
 		public void Einziehen(decimal beitrag, decimal ermaessigterBeitrag) {
-			foreach(Mitglied mitglied in _db.FindeMitglieder()) {
+			var mitglieder = _db.FindeMitglieder();
+			foreach(Mitglied mitglied in mitglieder) {
 
 				if(DateTime.Now.Year != mitglied.Bezahltesjahr) {
 					Kontoverbindung konto = _db.FindKonto (mitglied.KontoverbindungsId);
@@ -55,10 +56,11 @@ namespace VerwaltungLib
 						"GELD FÜR " + DateTime.Now.Year);
 					mitglied.Bezahltesjahr = DateTime.Now.Year;
 				}
+				_db.SpeicherMitglied (mitglied);
 			}
 		}
 
-		public IEnumerable<Kontoaktivitaeten> KontoaktivitaetenLaden(DateTime von, DateTime bis) {
+		public IEnumerable<Kontoaktivitaet> KontoaktivitaetenLaden(DateTime von, DateTime bis) {
 			return _bank.KontoaktivitaetenLaden (von, bis);
 		}
 
@@ -86,11 +88,11 @@ namespace VerwaltungLib
 
 	public interface IBank
 	{
-		IEnumerable<Kontoaktivitaeten> KontoaktivitaetenLaden(DateTime von, DateTime bis);
+		IEnumerable<Kontoaktivitaet> KontoaktivitaetenLaden(DateTime von, DateTime bis);
 		void SepaEinzug(string iban, string bic, string kontoinhaber, decimal betrag, string verwendungszweck);
 	}
 
-	public struct Kontoaktivitaeten {
+	public struct Kontoaktivitaet {
 		public string IBAN {
 			get;
 			set;

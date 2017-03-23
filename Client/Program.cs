@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using VerwaltungLib;
 
@@ -132,14 +131,14 @@ namespace Client
 			Console.WriteLine ("Kontoaktivitaeten:" + zeiger);
 			Console.Write (string.Empty.PadLeft (Console.BufferWidth, '='));
 
-			if (!kontoBuffer.Any ()) {
+			if (!(kontoBuffer.Count>0)){
 				foreach (var kontoaktivitaet in kontoaktivitaeten) {
 					kontoBuffer.Add (Math.Abs (kontoaktivitaet.Betrag) + System.Globalization.CultureInfo.CurrentCulture.NumberFormat.CurrencySymbol + " am " + kontoaktivitaet.Datum.ToShortDateString () + (kontoaktivitaet.Betrag < 0 ? " nach " : " von ") + kontoaktivitaet.IBAN + " fuer " + kontoaktivitaet.Verwendungszweck);
 					kontoBuffer.Add (string.Empty.PadLeft (Console.BufferWidth, '='));
 				}
 			}
 
-			for (int i = zeiger; i < kontoBuffer.Count() && i < zeiger + Console.BufferHeight - 2; i++) {
+			for (int i = zeiger; i < kontoBuffer.Count && i < zeiger + Console.BufferHeight - 2; i++) {
 				Console.Write (Environment.NewLine);
 				Console.Write (kontoBuffer [i]);
 			}
@@ -147,7 +146,7 @@ namespace Client
 			var gedrueckteTaste = Console.ReadKey ();
 			if (GeheZuVorherigemMenupunkt (gedrueckteTaste) && zeiger > 0) {
 				zeiger--;
-			} else if (GeheZuNaechstemMenupunkt (gedrueckteTaste.Key) && zeiger < (kontoBuffer.Count () + 2) - Console.BufferHeight) {
+			} else if (GeheZuNaechstemMenupunkt (gedrueckteTaste.Key) && zeiger < (kontoBuffer.Count + 2) - Console.BufferHeight) {
 				zeiger++;
 			} else if (gedrueckteTaste.Key == ConsoleKey.Escape) {
 				zeiger = 1;
@@ -329,7 +328,12 @@ namespace Client
 		#region IBank implementation
 		public IEnumerable<Kontoaktivitaet> KontoaktivitaetenLaden (DateTime von, DateTime bis)
 		{
-			return this.ka.Where (_ => _.Datum >= von && _.Datum <= bis);
+			var ret = new List<Kontoaktivitaet> ();
+			foreach (var _ in ka) {
+				if (_.Datum >= von && _.Datum <= bis)
+					ret.Add (_);
+			}
+			return ret;
 		}
 
 		public void SepaEinzug (string iban, string bic, string kontoinhaber, decimal betrag, string verwendungszweck)
@@ -396,7 +400,7 @@ namespace Client
 		{
 			var files = System.IO.Directory.GetFiles (pfad, "*" + mitgliedDateiendung, System.IO.SearchOption.TopDirectoryOnly);
 			foreach (var file in files) {
-				var m = this.LadeMitgliedAusPersistentemSpeicher (Guid.Parse (System.IO.Path.GetFileNameWithoutExtension (file)));
+				var m = this.LadeMitgliedAusPersistentemSpeicher (new Guid(System.IO.Path.GetFileNameWithoutExtension (file)));
 				_memDB.SpeicherMitglied (m);
 				var k = LadeKontoAusPersistentemSpeicher (m.KontoverbindungsId);
 				_memDB.KontoSpeichern (k);
@@ -435,7 +439,7 @@ namespace Client
 				mitglied.Berufsstand = (Berufsstand)reader.ReadInt32 (); //((int)m.Berufsstand);
 				var jahr = reader.ReadInt32 (); //(m.Bezahltesjahr??-1);
 				mitglied.Geburtstag = new DateTime (reader.ReadInt64 ()); //(m.Geburtstag.Ticks);
-				mitglied.KontoverbindungsId = Guid.Parse (reader.ReadString ());// reader.Write (m.KontoverbindungsId.ToString());
+				mitglied.KontoverbindungsId = new Guid (reader.ReadString ());// reader.Write (m.KontoverbindungsId.ToString());
 				mitglied.Nachname = reader.ReadString ();//	reader.Write (m.Nachname);
 				mitglied.Vorname = reader.ReadString ();// reader.Write (m.Vorname);
 				mitglied.Bezahltesjahr = jahr == -1 ? null : (Nullable<int>)jahr;
@@ -471,7 +475,7 @@ namespace Client
 		{
 			var files = System.IO.Directory.GetFiles (pfad, "*" + kontoaktivitaetDateiendung, System.IO.SearchOption.TopDirectoryOnly);
 			foreach (var filename in files) {
-				var id = Guid.Parse (System.IO.Path.GetFileNameWithoutExtension (filename));
+				var id = new Guid (System.IO.Path.GetFileNameWithoutExtension (filename));
 				var datei = System.IO.Path.Combine (pfad, id.ToString () + kontoaktivitaetDateiendung);
 				var k = new Kontoaktivitaet ();
 				using (var file = System.IO.File.OpenRead (datei))
@@ -522,19 +526,42 @@ namespace Client
 		}
 		#region IDatenbank implementation
 		public Kontoverbindung FindKonto (Guid kontoverbindungsId)
-		{
-			return _verbindungen.Single (_ => _.Id == kontoverbindungsId);
+		{ 
+			Kontoverbindung ret = null;
+			foreach (var _ in _verbindungen) {
+				if (_.Id == kontoverbindungsId) {
+					if (ret == null) {
+						ret = _;
+					} else { 
+						throw new Exception ();
+					}
+				}
+			}
+			return ret;
 		}
 
 		public System.Collections.Generic.IEnumerable<Mitglied> FindeMitglieder ()
 		{
-			Console.Error.WriteLine ("Anzahl: " + mitglieder.Count ());
+			Console.Error.WriteLine ("Anzahl: " + mitglieder.Count);
 			return this.mitglieder.ToArray ();
 		}
 
 		public void SpeicherMitglied (Mitglied m)
-		{ 
-			var DbMitglied = mitglieder.SingleOrDefault (_ => _.Id == m.Id);
+		{
+
+			Mitglied DbMitglied = null;
+			foreach (var _ in mitglieder) {
+				if (_.Id == m.Id)
+					if (_ == null)
+						DbMitglied = _;
+				else {
+					DbMitglied = null;
+					break;
+				}
+			}
+
+
+			//var DbMitglied = mitglieder.SingleOrDefault (_ => _.Id == m.Id);
 
 
 			if (DbMitglied != null) {
@@ -547,12 +574,30 @@ namespace Client
 
 		public Mitglied FindeMitglied (Guid id)
 		{
-			return mitglieder.Single (_ => _.Id == id);
+			Mitglied ret = null;
+			foreach (var _ in mitglieder) {
+				if (_.Id == id)
+				if (_ == null)
+					ret = _;
+				else 
+					throw new Exception ();
+			}
+			return ret;
 		}
 
 		public Guid KontoSpeichern (Kontoverbindung k)
 		{
-			var DbKonto = _verbindungen.SingleOrDefault (_ => _.Id == k.Id);
+			Kontoverbindung DbKonto = null;
+			foreach (var _ in _verbindungen) {
+				if (_.Id == k.Id)
+				if (_ == null)
+					DbKonto = _;
+				else {
+					DbKonto = null;
+					break;
+				}
+			}
+			//= _verbindungen.SingleOrDefault (_ => _.Id == k.Id);
 
 			if (DbKonto != null) {
 				_verbindungen.Remove (DbKonto);

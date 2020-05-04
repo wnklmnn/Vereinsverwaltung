@@ -63,10 +63,10 @@ namespace Client
 			} else if (menu == 10) {
 				menu = JahresbilanzZeigen ();
 			} else if (menu == -1) {
-				goto fluechten;
+				goto brechen;
 			}
 			goto start;
-			fluechten: 
+			brechen: 
 			;
 		}
 
